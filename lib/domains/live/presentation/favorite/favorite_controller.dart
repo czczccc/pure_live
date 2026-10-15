@@ -12,6 +12,8 @@ import 'package:pure_live/core/config/refresh_config_controller.dart';
 import 'package:pure_live/domains/live/data/platforms/sites.dart';
 import 'package:pure_live/domains/live/domain/global_player_service.dart';
 import 'package:pure_live/domains/live/data/favorite_room_controller.dart';
+import 'package:pure_live/domains/live/data/followed_room_sync.dart';
+import 'package:pure_live/core/config/cookie_settings_controller.dart';
 
 class FavoriteController extends LocalReactivePageController<LiveRoom>
     with GetTickerProviderStateMixin, WidgetsBindingObserver {
@@ -119,6 +121,13 @@ class FavoriteController extends LocalReactivePageController<LiveRoom>
     _workers.add(ever(tagController.roomTagsMap, (_) => applyLocalFilter()));
     _workers.add(ever(SettingsService.to.app.preferRealOnlineCounts, (_) => applyLocalFilter()));
     _workers.add(ever(SettingsService.to.app.realOnlinePlatforms, (_) => applyLocalFilter()));
+    // A fresh Huya login imports that account's follows once; later syncs are
+    // started from the follow page's sync button.
+    _workers.add(
+      ever(CookieSettingsController.to.huyaCookie, (_) {
+        if (!isClosed && FollowedRoomSync.hasHuyaAccount) unawaited(syncHuyaFollows());
+      }),
+    );
 
     // Begin verification during controller startup instead of waiting for the
     // first rendered frame. Persisted metadata remains useful, but its old
@@ -221,6 +230,31 @@ class FavoriteController extends LocalReactivePageController<LiveRoom>
   void _cancelPendingResumeRefresh() {
     _resumeRefreshTimer?.cancel();
     _resumeRefreshTimer = null;
+  }
+
+  final isSyncingHuyaFollows = false.obs;
+
+  Future<void> syncHuyaFollows() async {
+    if (isSyncingHuyaFollows.value) return;
+    if (!FollowedRoomSync.hasHuyaAccount) {
+      ToastUtil.show(i18n('huya_sync_follows_login_first'));
+      return;
+    }
+    isSyncingHuyaFollows.value = true;
+    ToastUtil.show(i18n('huya_sync_follows_running'));
+    try {
+      final result = await FollowedRoomSync.syncHuya();
+      if (isClosed) return;
+      ToastUtil.show(
+        i18n('huya_sync_follows_done', args: {'fetched': '${result.fetched}', 'added': '${result.added}'}),
+      );
+      if (result.added > 0) EventBus.instance.emit('changeFavorite', true);
+    } catch (error) {
+      developer.log('Huya follow sync failed: $error', name: 'FavoriteController');
+      if (!isClosed) ToastUtil.show(i18n('huya_sync_follows_failed'));
+    } finally {
+      if (!isClosed) isSyncingHuyaFollows.value = false;
+    }
   }
 
   @override

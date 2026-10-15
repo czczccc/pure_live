@@ -5,6 +5,7 @@ import 'package:pure_live/core/index.dart';
 import 'package:pure_live/core/network/douyu_utils.dart';
 import 'package:pure_live/domains/account/presentation/account/account_controller.dart';
 import 'package:pure_live/domains/account/data/bilibili_account_service.dart';
+import 'package:pure_live/domains/account/presentation/account/huya/huya_web_login_controller.dart';
 
 class AccountPage extends GetView<AccountController> {
   const AccountPage({super.key});
@@ -56,9 +57,14 @@ class AccountPage extends GetView<AccountController> {
                     ? _showLogoutDialog(
                         context,
                         accountName: i18n('site_huya'),
-                        onConfirm: () => cookie.huyaCookie.v = "",
+                        onConfirm: () {
+                          cookie.huyaCookie.v = "";
+                          // The login WebView keeps its own cookie jar; clear it so the
+                          // next login does not silently reuse the old account.
+                          unawaited(clearHuyaWebLoginCookies());
+                        },
                       )
-                    : Get.toNamed(RoutePath.kHuyaCookie),
+                    : Get.toNamed(RoutePath.kHuyaWebLogin),
               );
             }),
             Obx(() {
@@ -185,11 +191,7 @@ class AccountPage extends GetView<AccountController> {
                 },
                 isLogined: isLogined,
                 onTap: () => isLogined
-                    ? _showLogoutDialog(
-                        context,
-                        accountName: i18n('site_douyu'),
-                        onConfirm: cookie.clearDouyuSession,
-                      )
+                    ? _showLogoutDialog(context, accountName: i18n('site_douyu'), onConfirm: cookie.clearDouyuSession)
                     // A cookie that no longer holds a session is replaced, not
                     // signed out of: the editor is where the viewer fixes it.
                     : Get.toNamed(RoutePath.kDouyuAccountCookie),

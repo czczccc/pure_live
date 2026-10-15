@@ -3,6 +3,7 @@ import 'package:pure_live/core/index.dart';
 import 'package:pure_live/domains/live/presentation/tags/live_tag.dart';
 import 'package:pure_live/domains/live/presentation/favorite/room_grid_view.dart';
 import 'package:pure_live/core/widgets/common_appbar_actions.dart';
+import 'package:pure_live/core/config/cookie_settings_controller.dart';
 import 'package:pure_live/domains/live/presentation/tags/tag_management_controller.dart';
 import 'package:pure_live/domains/live/presentation/favorite/favorite_controller.dart';
 import 'package:pure_live/domains/live/data/platforms/sites.dart';
@@ -25,7 +26,16 @@ class FavoritePage extends GetView<FavoriteController> {
             appBar: AppBar(
               centerTitle: true,
               leading: showAction ? const MenuButton() : null,
-              actions: showAction ? [CommonAppBarActions()] : null,
+              actions: [
+                if (CookieSettingsController.to.huyaCookie.v.isNotEmpty)
+                  IconButton(
+                    key: const ValueKey('favorite-sync-huya-follows'),
+                    tooltip: i18n('huya_sync_follows'),
+                    onPressed: controller.isSyncingHuyaFollows.value ? null : controller.syncHuyaFollows,
+                    icon: const Icon(Remix.user_follow_line),
+                  ),
+                if (showAction) CommonAppBarActions(),
+              ],
               title: ScrollableTabBar(
                 key: const ValueKey('favorite-status-tabs'),
                 controller: controller.tabController,

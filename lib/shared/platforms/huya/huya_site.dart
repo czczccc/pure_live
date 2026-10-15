@@ -929,7 +929,7 @@ class HuyaSite
     return HuyaViewerIdentity(uid: _fallbackViewerUid, guid: _viewerGuid, isAnonymous: true);
   }
 
-  @visibleForTesting
+  /// The signed-in account UID in a Huya cookie, or null for a guest cookie.
   static int? parseViewerUidFromCookie(String cookie) {
     final match = RegExp(r'(?:^|;\s*)yyuid=(\d+)(?:;|$)').firstMatch(cookie);
     final uid = int.tryParse(match?.group(1) ?? '');

@@ -5,9 +5,12 @@ import 'package:pure_live/get/get.dart';
 import 'package:pure_live/core/storage/hive_rx.dart';
 
 class VolumeSettingsController extends GetxController {
-  final RxDouble defaultMobileVolume = hiveDouble('defaultMobileVolume', 0.5);
+  final RxDouble defaultMobileVolume = hiveDouble('defaultMobileVolume', 1.0);
   final RxDouble defaultDesktopVolume = hiveDouble('defaultDesktopVolume', 1.0);
   final RxBool globalVolumeMute = hiveBool('globalVolumeMute', false);
+  // mpv applies a cubic curve to its volume, so the old 50% mobile default
+  // played at ~12% amplitude (-18 dB), far quieter than the official apps.
+  final RxBool _mobileVolumeDefaultMigrated = hiveBool('mobileVolumeDefaultMigrated', false);
   final RxString _roomVolumesRaw = hiveString('roomVolumes', '{}');
   final RxMap<String, double> rxRoomVolumes = <String, double>{}.obs;
   Map<String, double> get roomVolumes => rxRoomVolumes;
@@ -27,7 +30,11 @@ class VolumeSettingsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    final mobile = normalizeVolume(defaultMobileVolume.v, fallback: 0.5);
+    if (!_mobileVolumeDefaultMigrated.v) {
+      if (defaultMobileVolume.v == 0.5) defaultMobileVolume.v = 1.0;
+      _mobileVolumeDefaultMigrated.v = true;
+    }
+    final mobile = normalizeVolume(defaultMobileVolume.v, fallback: 1.0);
     final desktop = normalizeVolume(defaultDesktopVolume.v, fallback: 1.0);
     if (!defaultMobileVolume.v.isFinite || defaultMobileVolume.v != mobile) defaultMobileVolume.v = mobile;
     if (!defaultDesktopVolume.v.isFinite || defaultDesktopVolume.v != desktop) defaultDesktopVolume.v = desktop;
@@ -50,7 +57,7 @@ class VolumeSettingsController extends GetxController {
 
   double get currentPlatformDefaultVolume {
     return Platform.isAndroid || Platform.isIOS
-        ? normalizeVolume(defaultMobileVolume.v, fallback: 0.5)
+        ? normalizeVolume(defaultMobileVolume.v, fallback: 1.0)
         : normalizeVolume(defaultDesktopVolume.v, fallback: 1.0);
   }
 
@@ -65,7 +72,7 @@ class VolumeSettingsController extends GetxController {
   }
 
   void resetVolumeToDefault() {
-    defaultMobileVolume.v = 0.5;
+    defaultMobileVolume.v = 1.0;
     defaultDesktopVolume.v = 1.0;
     globalVolumeMute.v = false;
     rxRoomVolumes.clear();
@@ -93,7 +100,7 @@ class VolumeSettingsController extends GetxController {
   static ({double mobile, double desktop, bool mute, Map<String, double> volumes}) parseConfig(
     Map<String, dynamic> json,
   ) {
-    final mobile = _parseVolume(json['defaultMobileVolume'], fallback: 0.5);
+    final mobile = _parseVolume(json['defaultMobileVolume'], fallback: 1.0);
     final desktop = _parseVolume(json['defaultDesktopVolume'], fallback: 1.0);
     final mute = json['globalVolumeMute'] as bool? ?? false;
     final volumes = parseRoomVolumes(json['roomVolumes']);
@@ -132,7 +139,7 @@ class VolumeSettingsController extends GetxController {
   static Map<String, dynamic> extractConfig(Map<String, dynamic>? rootConfig) {
     final volume = rootConfig?['volume'] as Map<String, dynamic>? ?? {};
     return {
-      'defaultMobileVolume': (volume['defaultMobileVolume'] ?? 0.5).toDouble(),
+      'defaultMobileVolume': (volume['defaultMobileVolume'] ?? 1.0).toDouble(),
       'defaultDesktopVolume': (volume['defaultDesktopVolume'] ?? 1.0).toDouble(),
       'globalVolumeMute': volume['globalVolumeMute'] ?? false,
       'roomVolumes': volume['roomVolumes'] ?? {},

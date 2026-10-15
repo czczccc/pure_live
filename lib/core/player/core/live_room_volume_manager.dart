@@ -21,7 +21,7 @@ class LiveRoomVolumeManager {
     if (volume != null && volume.isFinite) return volume.clamp(0.0, 1.0).toDouble();
 
     return Platform.isAndroid || Platform.isIOS
-        ? VolumeSettingsController.normalizeVolume(SettingsService.to.vol.defaultMobileVolume.v, fallback: 0.5)
+        ? VolumeSettingsController.normalizeVolume(SettingsService.to.vol.defaultMobileVolume.v, fallback: 1.0)
         : VolumeSettingsController.normalizeVolume(SettingsService.to.vol.defaultDesktopVolume.v, fallback: 1.0);
   }
 

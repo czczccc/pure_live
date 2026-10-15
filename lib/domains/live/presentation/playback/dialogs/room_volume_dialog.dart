@@ -54,7 +54,7 @@ class _RoomVolumeEditorState extends State<_RoomVolumeEditor> {
     super.initState();
     final volume = SettingsService.to.vol;
     _mute = volume.globalVolumeMute.v;
-    _mobileVolume = _normalized(volume.defaultMobileVolume.v, fallback: 0.5);
+    _mobileVolume = _normalized(volume.defaultMobileVolume.v, fallback: 1.0);
     _desktopVolume = _normalized(volume.defaultDesktopVolume.v, fallback: 1.0);
   }
 

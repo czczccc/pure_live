@@ -307,42 +307,9 @@ class _FirebaseEmailAuthState extends State<FirebaseEmailAuth> {
       if (kIsWeb) {
         credential = await widget.backend.signInWithPopup(githubProvider);
       } else if (Platform.isWindows) {
-        final authUrl = Uri.parse(
-          '${FirebaseManager.middlePageUrl}?platform=windows&scheme=${FirebaseManager.customScheme}',
-        );
-        if (await canLaunchUrl(authUrl)) {
-          await launchUrl(authUrl, mode: LaunchMode.externalApplication);
-        } else {
-          throw 'Could not launch authentication URL';
-        }
-
-        final pasteText = await AppPromptDialogs.showEditTextDialog(
-          "",
-          title: i18n("github_login"),
-          hintText: i18n("paste_auth_link"),
-        );
-
-        if (pasteText == null || pasteText.trim().isEmpty) {
-          return;
-        }
-
-        const prefix = 'purelive://auth?credential=';
-        final text = pasteText.trim();
-        if (!text.startsWith(prefix)) {
-          throw 'invalid link';
-        }
-
-        final encoded = text.substring(prefix.length);
-        final decoded = Uri.decodeComponent(encoded);
-        final jsonMap = jsonDecode(decoded);
-        final accessToken = jsonMap['accessToken'];
-        if (accessToken == null || accessToken.isEmpty) {
-          throw 'invalid token';
-        }
-
-        final githubCredential = GithubAuthProvider.credential(accessToken);
-        credential = await widget.backend.signInWithCredential(githubCredential);
-
+        final pasted = await _signInWithGitHubAuthLink();
+        if (pasted == null) return;
+        credential = pasted;
         if (await windowManager.isMinimized()) {
           await windowManager.restore();
         }
@@ -351,6 +318,17 @@ class _FirebaseEmailAuthState extends State<FirebaseEmailAuth> {
         await windowManager.setAlwaysOnTop(true);
         await Future.delayed(const Duration(milliseconds: 100));
         await windowManager.setAlwaysOnTop(false);
+      } else if (Platform.isAndroid) {
+        // Native provider sign-in needs this build's signing SHA-1 registered in
+        // Firebase, which self-signed builds lack; fall back to the browser link flow.
+        try {
+          credential = await widget.backend.signInWithProvider(githubProvider);
+        } on FirebaseAuthException catch (error) {
+          if (error.code == 'web-context-canceled' || error.code == 'canceled') rethrow;
+          final pasted = await _signInWithGitHubAuthLink();
+          if (pasted == null) return;
+          credential = pasted;
+        }
       } else if (Platform.isMacOS || Platform.isLinux) {
         throw 'Unsupported desktop platform';
       } else {
@@ -366,6 +344,44 @@ class _FirebaseEmailAuthState extends State<FirebaseEmailAuth> {
     } finally {
       _finishAction(generation);
     }
+  }
+
+  Future<UserCredential?> _signInWithGitHubAuthLink() async {
+    final authUrl = Uri.parse(
+      '${FirebaseManager.middlePageUrl}?platform=windows&scheme=${FirebaseManager.customScheme}',
+    );
+    if (await canLaunchUrl(authUrl)) {
+      await launchUrl(authUrl, mode: LaunchMode.externalApplication);
+    } else {
+      throw 'Could not launch authentication URL';
+    }
+
+    final pasteText = await AppPromptDialogs.showEditTextDialog(
+      "",
+      title: i18n("github_login"),
+      hintText: i18n("paste_auth_link"),
+    );
+
+    if (pasteText == null || pasteText.trim().isEmpty) {
+      return null;
+    }
+
+    const prefix = 'purelive://auth?credential=';
+    final text = pasteText.trim();
+    if (!text.startsWith(prefix)) {
+      throw 'invalid link';
+    }
+
+    final encoded = text.substring(prefix.length);
+    final decoded = Uri.decodeComponent(encoded);
+    final jsonMap = jsonDecode(decoded);
+    final accessToken = jsonMap['accessToken'];
+    if (accessToken == null || accessToken.isEmpty) {
+      throw 'invalid token';
+    }
+
+    final githubCredential = GithubAuthProvider.credential(accessToken);
+    return widget.backend.signInWithCredential(githubCredential);
   }
 
   void _reportActionError(Object error, String fallbackKey) {

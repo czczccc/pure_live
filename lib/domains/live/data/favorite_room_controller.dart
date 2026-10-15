@@ -292,6 +292,20 @@ class FavoriteRoomController extends GetxController {
     });
   }
 
+  /// Adds every room not yet followed in one persisted write and returns how
+  /// many were added. Rooms already followed are left untouched.
+  Future<int> addRoomsDurably(Iterable<LiveRoom> rooms) {
+    return _favoriteMutationLock.synchronized(() async {
+      final before = List<LiveRoom>.from(favoriteRooms.v);
+      var added = 0;
+      for (final room in rooms) {
+        if (addRoom(room)) added++;
+      }
+      if (added > 0) await _persistRoomsOrRollback(before);
+      return added;
+    });
+  }
+
   bool removeRoom(LiveRoom liveroom) {
     final index = favoriteRooms.v.indexWhere((candidate) => candidate.hasSameIdentity(liveroom));
 

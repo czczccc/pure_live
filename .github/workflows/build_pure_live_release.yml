@@ -978,7 +978,8 @@ jobs:
             echo "Release tag $RELEASE_TAG does not match pubspec v$version; leaving version.json."
             exit 0
           fi
-          notes="$(git log -20 --pretty='- %s' --grep='\[skip ci\]' --invert-grep | head -10)"
+          # -n limits git itself; piping into head would SIGPIPE under pipefail.
+          notes="$(git log -n 10 --pretty='- %s' --grep='\[skip ci\]' --invert-grep)"
           python3 tool/release_version.py publish --repository "$REPOSITORY" --tag "$RELEASE_TAG" --notes "$notes"
       - name: Commit and Push releases.json
         shell: bash

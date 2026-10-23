@@ -2658,5 +2658,17 @@
   "player_pause": "暂停",
   "player_back_to_room": "回到直播间",
   "account_email_undisclosed": "未公开邮箱",
-  "live_sc_read_failed": "SC读取失败"
+  "live_sc_read_failed": "SC读取失败",
+  "server_sync": "服务器同步",
+  "server_sync_subtitle": "通过自建服务器在多台设备间同步关注、Cookie 和设置",
+  "server_sync_url": "服务器地址",
+  "server_sync_token": "同步密钥",
+  "server_sync_enable": "自动同步",
+  "server_sync_now": "立即同步",
+  "server_sync_save": "保存",
+  "server_sync_last": "上次同步",
+  "server_sync_never": "尚未同步",
+  "server_sync_failed": "同步失败",
+  "server_sync_done": "同步完成",
+  "server_sync_hint": "同步关注主播、关注分区、屏蔽词、标签、观看历史、平台 Cookie 和常用设置。窗口、代理、WebDAV 和壁纸设置只保存在本机。部署方法见仓库 sync_server 目录。"
 }

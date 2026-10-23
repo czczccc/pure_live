@@ -212,6 +212,11 @@ class PlayerSettingsController extends GetxController {
     audioExclusive.listen((_) => persist());
   }
 
+  /// Extra playback gain in dB (mpv `volume-gain`). Live streams are mastered
+  /// quieter than the official apps play them; 0 turns the boost off.
+  final RxInt audioBoostDb = hiveInt('audioBoostDb', 6);
+  static const List<int> audioBoostChoices = <int>[0, 3, 6, 9, 12];
+
   final RxBool floatPlay = hiveBool('floatPlay', false);
 
   final RxString floatWindowGeometry = hiveString('floatWindowGeometry', '');

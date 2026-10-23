@@ -276,6 +276,34 @@ class PlayerKernelSettingsPage extends GetView<SettingsService> {
                 value: player.hwdecCodecs,
               );
             }),
+          Obx(() {
+            final boost = SettingsService.to.player.audioBoostDb;
+            return context.buildTile(
+              icon: Remix.volume_up_line,
+              title: i18n('audio_boost'),
+              subtitle: '${boost.v == 0 ? i18n('audio_boost_off') : '+${boost.v} dB'} · ${i18n('audio_boost_hint')}',
+              trailing: const Icon(Remix.arrow_right_s_line),
+              onTap: () => showDialog<void>(
+                context: context,
+                builder: (dialogContext) => SimpleDialog(
+                  title: Text(i18n('audio_boost')),
+                  children: [
+                    for (final db in PlayerSettingsController.audioBoostChoices)
+                      SimpleDialogOption(
+                        onPressed: () {
+                          boost.v = db;
+                          Navigator.of(dialogContext).pop();
+                        },
+                        child: Text(
+                          db == 0 ? i18n('audio_boost_off') : '+$db dB',
+                          style: TextStyle(fontWeight: boost.v == db ? FontWeight.bold : FontWeight.normal),
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            );
+          }),
           if (Platform.isWindows)
             context.buildSwitchTile(
               icon: Remix.headphone_line,

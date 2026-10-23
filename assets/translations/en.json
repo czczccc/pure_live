@@ -2676,5 +2676,13 @@
   "douyin_web_login_tip": "Tap Log in at the top right and scan the QR code with the Douyin app. You return here automatically after signing in.",
   "danmaku_send_hint": "Send danmaku to the room",
   "danmaku_send_failed": "Failed to send danmaku",
-  "danmaku_send_login_required": "Sign-in expired. Sign in to this platform again"
+  "danmaku_send_login_required": "Sign-in expired. Sign in to this platform again",
+  "platform_sync_follows": "Sync platform follows (Huya, Bilibili, Douyin)",
+  "platform_sync_follows_running": "Syncing platform follows…",
+  "platform_sync_follows_done": "Read {fetched} platform follows, added {added}",
+  "platform_sync_follows_partial": "Added {added} follows; {failed} failed, sign in again and retry",
+  "platform_sync_follows_login_first": "Sign in to Huya, Bilibili or Douyin on the account page first",
+  "audio_boost": "Volume boost",
+  "audio_boost_off": "Off",
+  "audio_boost_hint": "Live streams are often quieter than the official apps; applies the next time you open a room"
 }

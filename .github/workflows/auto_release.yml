@@ -1,0 +1,65 @@
+name: Auto Release
+
+# Every change merged to master gets a new patch version and an Android +
+# Windows release. Installed apps see the update once the release is published
+# and assets/version.json is updated by the build workflow's last job.
+on:
+  push:
+    branches: [master]
+    paths-ignore:
+      - "docs/**"
+      - "**/*.md"
+      - "sync_server/**"
+      - "assets/releases.json"
+      - "assets/version.json"
+      - ".github/workflows/update_releases.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+
+concurrency:
+  group: auto-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    # Version bumps are committed with [skip ci]; never react to our own push.
+    if: ${{ github.actor != 'github-actions[bot]' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: master
+          fetch-depth: 0
+      - name: Bump version
+        id: bump
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(python3 tool/release_version.py bump)"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add pubspec.yaml
+          git commit -m "chore: release v$version [skip ci]"
+          git push origin HEAD:master
+      - name: Start release build
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.bump.outputs.tag }}
+        run: |
+          set -euo pipefail
+          gh workflow run build_pure_live_release.yml --ref master \
+            -f build_android=true \
+            -f build_windows=true \
+            -f build_linux=false \
+            -f build_macos=false \
+            -f build_ios=false \
+            -f run_quality=false \
+            -f create_release=true \
+            -f release_tag="$TAG"
+          echo "Started release build for $TAG" >> "$GITHUB_STEP_SUMMARY"

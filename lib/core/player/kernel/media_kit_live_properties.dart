@@ -178,6 +178,10 @@ abstract final class MediaKitLiveProperties {
       if (segment.deinterlace != 'auto') EngineOption('deinterlace', segment.deinterlace),
       if (segment.hwdecCodecs != 'all') EngineOption('hwdec-codecs', segment.hwdecCodecs),
       if (segment.audioExclusive != 'no') EngineOption('audio-exclusive', 'yes'),
+      // Keep stereo: the default auto-safe layout can negotiate a mono output
+      // on some Android audio paths.
+      EngineOption('audio-channels', 'stereo'),
+      EngineOption('volume-gain', SettingsService.to.player.audioBoostDb.v.clamp(0, 12).toString()),
     ]);
 
     // The manual ao pick rides the same custom-output gate as vo/hwdec:

@@ -866,7 +866,7 @@ jobs:
           - ARM64-v8a
           - ARMv7
           - x86_64
-          - 统一 SHA256 校验文件：[**ANDROID_SHA256SUM.txt**](https://github.com/liuchuancong/pure_live/releases/download/$RELEASE_TAG/ANDROID_SHA256SUM.txt)
+          - 统一 SHA256 校验文件：[**ANDROID_SHA256SUM.txt**](https://github.com/${{ github.repository }}/releases/download/$RELEASE_TAG/ANDROID_SHA256SUM.txt)
           ### 🐧 Linux 版
           - Linux x64
           - **DEB 安装包**：适合 Debian/Ubuntu 及其衍生发行版
@@ -876,7 +876,7 @@ jobs:
           - TrollStore / ad-hoc IPA
           - ARM64
           ### 🔧 Build Metadata
-          [**BUILD_METADATA.json**](https://github.com/liuchuancong/pure_live/releases/download/$RELEASE_TAG/BUILD_METADATA.json)
+          [**BUILD_METADATA.json**](https://github.com/${{ github.repository }}/releases/download/$RELEASE_TAG/BUILD_METADATA.json)
           ### 📝 本次更新
           $RELEASE_DESCRIPTION
           EOF
@@ -963,6 +963,23 @@ jobs:
               encoding="utf-8",
           )
           PY
+      - name: Point assets/version.json at the release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          # Only when the release matches the pubspec version on master, so a
+          # manual release of an older tag never advertises the wrong build.
+          version="$(grep '^version:' pubspec.yaml | sed 's/version: //; s/+.*//')"
+          if [[ "v$version" != "$RELEASE_TAG" ]]; then
+            echo "Release tag $RELEASE_TAG does not match pubspec v$version; leaving version.json."
+            exit 0
+          fi
+          notes="$(git log -20 --pretty='- %s' --grep='\[skip ci\]' --invert-grep | head -10)"
+          python3 tool/release_version.py publish --repository "$REPOSITORY" --tag "$RELEASE_TAG" --notes "$notes"
       - name: Commit and Push releases.json
         shell: bash
         env:
@@ -971,11 +988,11 @@ jobs:
           set -euo pipefail
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          if [[ -z "$(git status --porcelain -- assets/releases.json)" ]]; then
-            echo "assets/releases.json has no changes."
+          if [[ -z "$(git status --porcelain -- assets/releases.json assets/version.json)" ]]; then
+            echo "assets/releases.json and assets/version.json have no changes."
             exit 0
           fi
-          git add assets/releases.json
+          git add assets/releases.json assets/version.json
           git commit -m "chore: update releases.json for $RELEASE_TAG [skip ci]"
           git pull --rebase origin master
           git push origin master

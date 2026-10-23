@@ -14,7 +14,7 @@ class AppConfig {
 }
 
 class AppConfigData {
-  final String pureliveUpdateOwner = 'liuchuancong';
+  final String pureliveUpdateOwner = 'czczccc';
 
   final String pureliveUpdateRepository = 'pure_live';
 

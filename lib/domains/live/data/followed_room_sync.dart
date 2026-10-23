@@ -3,6 +3,8 @@ import 'package:pure_live/core/config/cookie_settings_controller.dart';
 import 'package:pure_live/domains/live/data/favorite_room_controller.dart';
 import 'package:pure_live/shared/platforms/huya/huya_follow_api.dart';
 import 'package:pure_live/shared/platforms/huya/huya_site.dart';
+import 'package:pure_live/shared/platforms/douyin/douyin_follow_api.dart';
+import 'package:pure_live/shared/platforms/bilibili/bilibili_follow_api.dart';
 
 class FollowedRoomSyncResult {
   const FollowedRoomSyncResult({required this.fetched, required this.added});
@@ -19,25 +21,73 @@ typedef FollowedRoomsLoader = Future<List<LiveRoom>> Function(String cookie);
 class FollowedRoomSync {
   FollowedRoomSync._();
 
-  static Future<void>? _activeHuyaSync;
+  /// Platforms whose account follow list can be imported.
+  static const List<String> platforms = <String>['huya', 'bilibili', 'douyin'];
 
-  static bool get hasHuyaAccount => HuyaSite.parseViewerUidFromCookie(CookieSettingsController.to.huyaCookie.v) != null;
+  static final Map<String, Future<void>> _active = <String, Future<void>>{};
 
-  static Future<FollowedRoomSyncResult> syncHuya({FollowedRoomsLoader? loader}) async {
-    while (_activeHuyaSync != null) {
-      await _activeHuyaSync;
-    }
-    final task = _syncHuya(loader ?? HuyaFollowApi.fetchFollowedRooms);
-    _activeHuyaSync = task.then((_) {}, onError: (_) {});
-    try {
-      return await task;
-    } finally {
-      _activeHuyaSync = null;
+  static String cookieFor(String platform) {
+    final cookies = CookieSettingsController.to;
+    switch (platform) {
+      case 'huya':
+        return cookies.huyaCookie.v;
+      case 'bilibili':
+        return cookies.bilibiliCookie.v;
+      case 'douyin':
+        return cookies.douyinCookie.v;
+      default:
+        return '';
     }
   }
 
-  static Future<FollowedRoomSyncResult> _syncHuya(FollowedRoomsLoader loader) async {
-    final rooms = await loader(CookieSettingsController.to.huyaCookie.v);
+  static bool hasAccount(String platform) {
+    final cookie = cookieFor(platform);
+    switch (platform) {
+      case 'huya':
+        return HuyaSite.parseViewerUidFromCookie(cookie) != null;
+      case 'bilibili':
+        return cookie.contains('SESSDATA=');
+      case 'douyin':
+        return RegExp(r'(?:^|;\s*)sessionid(?:_ss)?=[^;\s]').hasMatch(cookie);
+      default:
+        return false;
+    }
+  }
+
+  static bool get hasHuyaAccount => hasAccount('huya');
+
+  static bool get hasAnyAccount => platforms.any(hasAccount);
+
+  static FollowedRoomsLoader _defaultLoader(String platform) {
+    switch (platform) {
+      case 'huya':
+        return HuyaFollowApi.fetchFollowedRooms;
+      case 'bilibili':
+        return BilibiliFollowApi.fetchFollowedRooms;
+      case 'douyin':
+        return DouyinFollowApi.fetchFollowedRooms;
+      default:
+        throw ArgumentError.value(platform, 'platform');
+    }
+  }
+
+  static Future<FollowedRoomSyncResult> syncHuya({FollowedRoomsLoader? loader}) => sync('huya', loader: loader);
+
+  static Future<FollowedRoomSyncResult> sync(String platform, {FollowedRoomsLoader? loader}) async {
+    while (_active[platform] != null) {
+      await _active[platform];
+    }
+    final task = _sync(platform, loader ?? _defaultLoader(platform));
+    _active[platform] = task.then((_) {}, onError: (_) {});
+    try {
+      return await task;
+    } finally {
+      _active.remove(platform);
+    }
+  }
+
+  static Future<FollowedRoomSyncResult> _sync(String platform, FollowedRoomsLoader loader) async {
+    final rooms = await loader(cookieFor(platform));
     final added = await FavoriteRoomController.to.addRoomsDurably(rooms);
     return FollowedRoomSyncResult(fetched: rooms.length, added: added);
   }

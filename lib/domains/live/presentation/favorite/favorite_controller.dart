@@ -121,13 +121,19 @@ class FavoriteController extends LocalReactivePageController<LiveRoom>
     _workers.add(ever(tagController.roomTagsMap, (_) => applyLocalFilter()));
     _workers.add(ever(SettingsService.to.app.preferRealOnlineCounts, (_) => applyLocalFilter()));
     _workers.add(ever(SettingsService.to.app.realOnlinePlatforms, (_) => applyLocalFilter()));
-    // A fresh Huya login imports that account's follows once; later syncs are
-    // started from the follow page's sync button.
-    _workers.add(
-      ever(CookieSettingsController.to.huyaCookie, (_) {
-        if (!isClosed && FollowedRoomSync.hasHuyaAccount) unawaited(syncHuyaFollows());
-      }),
-    );
+    // A fresh platform login imports that account's follows once; later syncs
+    // are started from the follow page's sync button.
+    for (final entry in {
+      'huya': CookieSettingsController.to.huyaCookie,
+      'bilibili': CookieSettingsController.to.bilibiliCookie,
+      'douyin': CookieSettingsController.to.douyinCookie,
+    }.entries) {
+      _workers.add(
+        ever(entry.value, (_) {
+          if (!isClosed && FollowedRoomSync.hasAccount(entry.key)) unawaited(syncPlatformFollows(only: entry.key));
+        }),
+      );
+    }
 
     // Begin verification during controller startup instead of waiting for the
     // first rendered frame. Persisted metadata remains useful, but its old
@@ -234,28 +240,46 @@ class FavoriteController extends LocalReactivePageController<LiveRoom>
 
   final isSyncingHuyaFollows = false.obs;
 
-  Future<void> syncHuyaFollows() async {
+  /// Imports follows from every signed-in platform, or only [only].
+  Future<void> syncPlatformFollows({String? only}) async {
     if (isSyncingHuyaFollows.value) return;
-    if (!FollowedRoomSync.hasHuyaAccount) {
-      ToastUtil.show(i18n('huya_sync_follows_login_first'));
+    final targets = [
+      for (final platform in FollowedRoomSync.platforms)
+        if ((only == null || only == platform) && FollowedRoomSync.hasAccount(platform)) platform,
+    ];
+    if (targets.isEmpty) {
+      ToastUtil.show(i18n('platform_sync_follows_login_first'));
       return;
     }
     isSyncingHuyaFollows.value = true;
-    ToastUtil.show(i18n('huya_sync_follows_running'));
+    ToastUtil.show(i18n('platform_sync_follows_running'));
+    var fetched = 0;
+    var added = 0;
+    final failed = <String>[];
     try {
-      final result = await FollowedRoomSync.syncHuya();
-      if (isClosed) return;
+      for (final platform in targets) {
+        try {
+          final result = await FollowedRoomSync.sync(platform);
+          fetched += result.fetched;
+          added += result.added;
+        } catch (error) {
+          developer.log('$platform follow sync failed: $error', name: 'FavoriteController');
+          failed.add(i18n('site_$platform'));
+        }
+        if (isClosed) return;
+      }
       ToastUtil.show(
-        i18n('huya_sync_follows_done', args: {'fetched': '${result.fetched}', 'added': '${result.added}'}),
+        failed.isEmpty
+            ? i18n('platform_sync_follows_done', args: {'fetched': '$fetched', 'added': '$added'})
+            : i18n('platform_sync_follows_partial', args: {'added': '$added', 'failed': failed.join('、')}),
       );
-      if (result.added > 0) EventBus.instance.emit('changeFavorite', true);
-    } catch (error) {
-      developer.log('Huya follow sync failed: $error', name: 'FavoriteController');
-      if (!isClosed) ToastUtil.show(i18n('huya_sync_follows_failed'));
+      if (added > 0) EventBus.instance.emit('changeFavorite', true);
     } finally {
       if (!isClosed) isSyncingHuyaFollows.value = false;
     }
   }
+
+  Future<void> syncHuyaFollows() => syncPlatformFollows(only: 'huya');
 
   @override
   void onClose() {

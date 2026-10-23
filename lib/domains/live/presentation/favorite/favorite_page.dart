@@ -27,11 +27,15 @@ class FavoritePage extends GetView<FavoriteController> {
               centerTitle: true,
               leading: showAction ? const MenuButton() : null,
               actions: [
-                if (CookieSettingsController.to.huyaCookie.v.isNotEmpty)
+                if ([
+                  CookieSettingsController.to.huyaCookie.v,
+                  CookieSettingsController.to.bilibiliCookie.v,
+                  CookieSettingsController.to.douyinCookie.v,
+                ].any((cookie) => cookie.isNotEmpty))
                   IconButton(
                     key: const ValueKey('favorite-sync-huya-follows'),
-                    tooltip: i18n('huya_sync_follows'),
-                    onPressed: controller.isSyncingHuyaFollows.value ? null : controller.syncHuyaFollows,
+                    tooltip: i18n('platform_sync_follows'),
+                    onPressed: controller.isSyncingHuyaFollows.value ? null : () => controller.syncPlatformFollows(),
                     icon: const Icon(Remix.user_follow_line),
                   ),
                 if (showAction) CommonAppBarActions(),

@@ -59,6 +59,7 @@ class RoutePath {
 
   static const kHuyaCookie = "/huya_cookie";
   static const kHuyaWebLogin = "/huya_web_login";
+  static const kDouyinWebLogin = "/douyin_web_login";
 
   static const kDouyuAccountCookie = "/douyu_account_cookie";
 

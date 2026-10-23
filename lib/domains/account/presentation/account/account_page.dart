@@ -6,6 +6,7 @@ import 'package:pure_live/core/network/douyu_utils.dart';
 import 'package:pure_live/domains/account/presentation/account/account_controller.dart';
 import 'package:pure_live/domains/account/data/bilibili_account_service.dart';
 import 'package:pure_live/domains/account/presentation/account/huya/huya_web_login_controller.dart';
+import 'package:pure_live/domains/account/presentation/account/douyin/douyin_web_login_controller.dart';
 
 class AccountPage extends GetView<AccountController> {
   const AccountPage({super.key});
@@ -113,9 +114,12 @@ class AccountPage extends GetView<AccountController> {
                     ? _showLogoutDialog(
                         context,
                         accountName: i18n('site_douyin'),
-                        onConfirm: () => cookie.douyinCookie.v = "",
+                        onConfirm: () {
+                          cookie.douyinCookie.v = "";
+                          unawaited(clearDouyinWebLoginCookies());
+                        },
                       )
-                    : Get.toNamed(RoutePath.kDouyinCookie),
+                    : Get.toNamed(RoutePath.kDouyinWebLogin),
               );
             }),
 

@@ -19,7 +19,6 @@ import 'package:pure_live/core/player/presentation/danmaku/player_danmaku_surfac
 import 'package:pure_live/core/player/presentation/danmaku/danmaku_surface_settings.dart';
 import 'package:pure_live/domains/live/presentation/playback/pages/danmaku_settings_page.dart';
 import 'package:pure_live/domains/live/presentation/playback/dialogs/known_room_link_dialog.dart';
-import 'package:pure_live/domains/live/presentation/playback/controllers/live_play_controller.dart';
 import 'package:pure_live/domains/live/presentation/playback/widgets/content_first_panel_layout.dart';
 import 'package:pure_live/domains/live/presentation/playback/widgets/video_player/volume_control.dart';
 import 'package:pure_live/domains/live/presentation/playback/widgets/layout/control_hover_region.dart';
@@ -1513,25 +1512,16 @@ class _FullscreenLocalDanmakuComposerState extends State<FullscreenLocalDanmakuC
     super.dispose();
   }
 
-  void _send() {
-    final text = _textController.text.trim();
-    final live = controller.livePlayController;
-    final local = live.localInteractionController;
-    if (!local.enabled.v || text.isEmpty) return;
-    live.emitLocalMessage(
-      local.createChat(text, platform: live.site),
-      showAsDanmaku: local.showAsDanmaku.v,
-      delay: LivePlayController.localChatDeliveryDelay,
-    );
-    _textController.clear();
-    ToastUtil.show(i18n('local_message_queued'));
+  Future<void> _send() async {
+    if (await controller.livePlayController.submitDanmaku(_textController.text)) _textController.clear();
   }
 
   @override
   Widget build(BuildContext context) {
     return Obx(() {
       final local = controller.livePlayController.localInteractionController;
-      if (!shouldShowFullscreenLocalDanmakuComposer(local.enabled.v)) return const SizedBox.shrink();
+      final realSend = controller.livePlayController.canSendRealDanmaku;
+      if (!shouldShowFullscreenLocalDanmakuComposer(local.enabled.v) && !realSend) return const SizedBox.shrink();
 
       final localStyle = local.currentDanmakuStyle;
       return SizedBox(
@@ -1563,7 +1553,7 @@ class _FullscreenLocalDanmakuComposerState extends State<FullscreenLocalDanmakuC
             isDense: true,
             filled: true,
             fillColor: Colors.black54,
-            hintText: i18n('local_message_hint'),
+            hintText: i18n(realSend ? 'danmaku_send_hint' : 'local_message_hint'),
             hintStyle: const TextStyle(color: Colors.white60, fontSize: 13),
             prefixIcon: IconButton(
               key: const ValueKey('fullscreen-local-danmaku-style'),

@@ -254,17 +254,8 @@ class DanmakuListViewState extends State<DanmakuListView> {
     // "return to live" button is the sole resume action.
   }
 
-  void _sendLocalMessage() {
-    final text = _composerController.text.trim();
-    final local = controller.localInteractionController;
-    if (!local.enabled.v || text.isEmpty) return;
-    controller.emitLocalMessage(
-      local.createChat(text, platform: controller.site),
-      showAsDanmaku: local.showAsDanmaku.v,
-      delay: LivePlayController.localChatDeliveryDelay,
-    );
-    _composerController.clear();
-    ToastUtil.show(i18n('local_message_queued'));
+  Future<void> _sendLocalMessage() async {
+    if (await controller.submitDanmaku(_composerController.text)) _composerController.clear();
   }
 
   void _removeActiveScrollPointer() {
@@ -308,10 +299,7 @@ class DanmakuListViewState extends State<DanmakuListView> {
           Icon(Icons.info_outline, size: 14, color: theme.colorScheme.primary),
           const SizedBox(width: 6),
           Expanded(
-            child: Text(
-              text,
-              style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-            ),
+            child: Text(text, style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant)),
           ),
           TextButton(
             key: const ValueKey('live-play-name-hint-login'),
@@ -425,7 +413,9 @@ class DanmakuListViewState extends State<DanmakuListView> {
                   ),
                 ),
                 Obx(() {
-                  if (!controller.localInteractionController.enabled.v) return const SizedBox.shrink();
+                  if (!controller.localInteractionController.enabled.v && !controller.canSendRealDanmaku) {
+                    return const SizedBox.shrink();
+                  }
                   final state = controller.state.value;
                   final screenMode = state.ui.screenMode;
                   return Material(
@@ -443,7 +433,9 @@ class DanmakuListViewState extends State<DanmakuListView> {
                                 onSubmitted: (_) => _sendLocalMessage(),
                                 decoration: InputDecoration(
                                   isDense: true,
-                                  hintText: i18n('local_message_hint'),
+                                  hintText: i18n(
+                                    controller.canSendRealDanmaku ? 'danmaku_send_hint' : 'local_message_hint',
+                                  ),
                                   prefixIcon: IconButton(
                                     key: const ValueKey('portrait-local-danmaku-style'),
                                     tooltip: i18n('local_danmaku_style'),
@@ -644,10 +636,7 @@ List<EmojiToken> _parseEmojiTokens(String text, {Map<String, String>? emoteUrls}
   }
 
   final atlas = EmojiAtlas.instance.regex;
-  final sources = <String>[
-    ...extras.map(RegExp.escape),
-    if (atlas != null) atlas.pattern,
-  ];
+  final sources = <String>[...extras.map(RegExp.escape), if (atlas != null) atlas.pattern];
 
   if (sources.isEmpty) {
     final tokens = [EmojiToken(isEmoji: false, value: text)];

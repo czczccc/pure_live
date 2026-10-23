@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:developer' as developer;
 
 import 'package:pure_live/core/index.dart';
+import 'package:pure_live/features/server_sync/server_sync_controller.dart';
 import 'package:pure_live/core/release/release_history_source.dart';
 import 'package:pure_live/core/platform/multi_instance_settings_source.dart';
 import 'package:pure_live/core/platform/desktop_exit_port.dart';
@@ -122,6 +123,7 @@ class InitialServices {
     Get.lazyPut(() => RecorderController(), fenix: true);
     Get.lazyPut(() => StreamResolverService(), fenix: true);
     Get.lazyPut(() => AuthController(), fenix: true);
+    Get.put(ServerSyncController(), permanent: true);
   }
 
   static Future<void> initDb() async {

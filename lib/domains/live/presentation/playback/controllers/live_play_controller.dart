@@ -32,6 +32,8 @@ import 'package:pure_live/domains/live/data/platforms/sites.dart';
 import 'package:pure_live/domains/live/domain/global_player_service.dart';
 import 'package:pure_live/domains/live/data/favorite_room_controller.dart';
 import 'package:pure_live/domains/live/data/history_controller.dart';
+import 'package:pure_live/domains/live/data/danmaku_sender.dart';
+import 'package:pure_live/core/config/cookie_settings_controller.dart';
 
 // live_play_controller.dart
 
@@ -607,6 +609,65 @@ class LivePlayController extends GetxController
       LiveAudienceMetricKind.totalViewers => detail.copyWith(totalViewers: text),
     };
     updateRoom(liveroom: candidate.withAudienceFallbackFrom(detail));
+  }
+
+  static final DanmakuSender _danmakuSender = DanmakuSender();
+  bool _sendingDanmaku = false;
+
+  String get _accountCookie {
+    final cookies = CookieSettingsController.to;
+    switch (site) {
+      case 'bilibili':
+        return cookies.bilibiliCookie.v;
+      case 'douyin':
+        return cookies.douyinCookie.v;
+      case 'huya':
+        return cookies.huyaCookie.v;
+      default:
+        return '';
+    }
+  }
+
+  /// Whether the composer sends to the platform instead of locally. Reads the
+  /// cookie observable, so callers inside `Obx` update on sign-in and logout.
+  bool get canSendRealDanmaku => DanmakuSender.supports(site) && _accountCookie.trim().isNotEmpty;
+
+  /// Sends [text] as a real danmaku when signed in to a supported platform,
+  /// otherwise as a local message. Returns true when the composer may clear.
+  Future<bool> submitDanmaku(String text) async {
+    final message = text.trim();
+    if (message.isEmpty) return false;
+    if (!canSendRealDanmaku) {
+      if (!localInteractionController.enabled.v) return false;
+      emitLocalMessage(
+        localInteractionController.createChat(message, platform: site),
+        showAsDanmaku: localInteractionController.showAsDanmaku.v,
+        delay: localChatDeliveryDelay,
+      );
+      ToastUtil.show(i18n('local_message_queued'));
+      return true;
+    }
+    final room = state.value.room.detail;
+    if (room == null || _sendingDanmaku) return false;
+    _sendingDanmaku = true;
+    try {
+      final result = await _danmakuSender.send(room, message, cookie: _accountCookie);
+      switch (result.status) {
+        case DanmakuSendStatus.sent:
+          return true;
+        case DanmakuSendStatus.notLoggedIn:
+          ToastUtil.show(i18n('danmaku_send_login_required'));
+          return false;
+        case DanmakuSendStatus.unsupported:
+        case DanmakuSendStatus.failed:
+          ToastUtil.show(
+            result.message.isEmpty ? i18n('danmaku_send_failed') : '${i18n('danmaku_send_failed')}: ${result.message}',
+          );
+          return false;
+      }
+    } finally {
+      _sendingDanmaku = false;
+    }
   }
 
   void emitLocalMessage(LiveMessage msg, {required bool showAsDanmaku, Duration delay = Duration.zero}) {

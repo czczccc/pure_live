@@ -7,6 +7,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:pure_live/core/logging/app_log.dart';
 import 'package:pure_live/core/platform/file_utils.dart';
 import 'package:pure_live/features/backup/scan_page.dart';
+import 'package:pure_live/features/server_sync/server_sync_page.dart';
 import 'package:pure_live/domains/account/presentation/auth/auth_controller.dart';
 import 'package:pure_live/features/backup/backup_recovery_service.dart';
 import 'package:pure_live/core/config/log_controller.dart';
@@ -154,6 +155,13 @@ class _BackupPageState extends State<BackupPage> {
                 subtitle: i18n("backup_to_webdav"),
                 isLong: true,
                 onTap: () => Get.toNamed(RoutePath.kWebDavPage),
+              ),
+              context.buildTile(
+                icon: Remix.server_line,
+                title: i18n('server_sync'),
+                subtitle: i18n('server_sync_subtitle'),
+                isLong: true,
+                onTap: () => Get.to(() => const ServerSyncPage()),
               ),
               context.buildTile(
                 icon: Remix.qr_scan_2_line,

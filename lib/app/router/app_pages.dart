@@ -31,6 +31,7 @@ import 'package:pure_live/domains/live/presentation/area_rooms/area_rooms_page.d
 import 'package:pure_live/domains/account/presentation/account/soop/soop_cookie_page.dart';
 import 'package:pure_live/domains/account/presentation/account/huya/huya_cookie_page.dart';
 import 'package:pure_live/domains/account/presentation/account/huya/huya_web_login_page.dart';
+import 'package:pure_live/domains/account/presentation/account/douyin/douyin_web_login_page.dart';
 import 'package:pure_live/domains/recorder/presentation/pages/recorder/recorder_page.dart';
 import 'package:pure_live/domains/account/presentation/account/bilibili/qr_login_page.dart';
 import 'package:pure_live/domains/live/presentation/playback/pages/live_play_page.dart';
@@ -131,6 +132,12 @@ class AppPages {
       name: RoutePath.kHuyaWebLogin,
       page: _smoothPage(() => const HuyaWebLoginPage()),
       bindings: [HuyaWebLoginBinding()],
+    ),
+
+    GetPage(
+      name: RoutePath.kDouyinWebLogin,
+      page: _smoothPage(() => const DouyinWebLoginPage()),
+      bindings: [DouyinWebLoginBinding()],
     ),
 
     GetPage(

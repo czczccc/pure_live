@@ -1,0 +1,11 @@
+services:
+  pure-live-sync:
+    build: .
+    restart: unless-stopped
+    environment:
+      SYNC_TOKEN: ${SYNC_TOKEN:?set SYNC_TOKEN in .env}
+    volumes:
+      - ./data:/data
+    # Bind to localhost and expose through your HTTPS reverse proxy.
+    ports:
+      - "127.0.0.1:8080:8080"

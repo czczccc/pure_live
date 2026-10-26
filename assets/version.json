@@ -1,23 +1,23 @@
 {
-  "version": "3.1.22",
-  "build_number": 4111,
-  "version_num": 301224111,
+  "version": "3.1.23",
+  "build_number": 4112,
+  "version_num": 301234112,
   "android_abis": [
     "armeabi-v7a",
     "arm64-v8a",
     "x86_64"
   ],
-  "version_desc": "version: 3.1.22\n版本更新：\n- ci: fix SIGPIPE in version.json release step (#7)\n- Sync Bilibili/Douyin follows, auto-release on merge, louder stereo audio (#6)\n- ci: skip MSIX when signing secrets are missing (#5)\n- Add server sync, Douyin QR login and real danmaku sending (#4)\n- ci: build debug-signed test APK when signing secrets are missing\n- Add in-app Huya login and followed-room sync (#3)\n- fix(auth): fall back to browser link GitHub login on Android (#2)\n- fix(volume): default mobile playback volume to 100% (#1)\n- Merge pull request #931 from vancez/master\n- fix(ios): add UIBackgroundModes audio for background playback",
+  "version_desc": "version: 3.1.23\n版本更新：\n- Fix Windows QR login blank page, Douyin danmaku CSRF, cookie sync on first join (#8)\n- ci: fix SIGPIPE in version.json release step (#7)\n- Sync Bilibili/Douyin follows, auto-release on merge, louder stereo audio (#6)\n- ci: skip MSIX when signing secrets are missing (#5)\n- Add server sync, Douyin QR login and real danmaku sending (#4)\n- ci: build debug-signed test APK when signing secrets are missing\n- Add in-app Huya login and followed-room sync (#3)\n- fix(auth): fall back to browser link GitHub login on Android (#2)\n- fix(volume): default mobile playback volume to 100% (#1)\n- Merge pull request #931 from vancez/master",
   "prerelease": false,
-  "download_url": "https://github.com/czczccc/pure_live/releases/tag/v3.1.22",
+  "download_url": "https://github.com/czczccc/pure_live/releases/tag/v3.1.23",
   "platforms": {
     "android": {
-      "version": "3.1.22",
-      "build_number": 4111,
-      "version_num": 301224111,
-      "version_desc": "version: 3.1.22\n版本更新：\n- ci: fix SIGPIPE in version.json release step (#7)\n- Sync Bilibili/Douyin follows, auto-release on merge, louder stereo audio (#6)\n- ci: skip MSIX when signing secrets are missing (#5)\n- Add server sync, Douyin QR login and real danmaku sending (#4)\n- ci: build debug-signed test APK when signing secrets are missing\n- Add in-app Huya login and followed-room sync (#3)\n- fix(auth): fall back to browser link GitHub login on Android (#2)\n- fix(volume): default mobile playback volume to 100% (#1)\n- Merge pull request #931 from vancez/master\n- fix(ios): add UIBackgroundModes audio for background playback",
+      "version": "3.1.23",
+      "build_number": 4112,
+      "version_num": 301234112,
+      "version_desc": "version: 3.1.23\n版本更新：\n- Fix Windows QR login blank page, Douyin danmaku CSRF, cookie sync on first join (#8)\n- ci: fix SIGPIPE in version.json release step (#7)\n- Sync Bilibili/Douyin follows, auto-release on merge, louder stereo audio (#6)\n- ci: skip MSIX when signing secrets are missing (#5)\n- Add server sync, Douyin QR login and real danmaku sending (#4)\n- ci: build debug-signed test APK when signing secrets are missing\n- Add in-app Huya login and followed-room sync (#3)\n- fix(auth): fall back to browser link GitHub login on Android (#2)\n- fix(volume): default mobile playback volume to 100% (#1)\n- Merge pull request #931 from vancez/master",
       "prerelease": false,
-      "download_url": "https://github.com/czczccc/pure_live/releases/tag/v3.1.22",
+      "download_url": "https://github.com/czczccc/pure_live/releases/tag/v3.1.23",
       "android_abis": [
         "armeabi-v7a",
         "arm64-v8a",
@@ -25,37 +25,37 @@
       ]
     },
     "windows": {
-      "version": "3.1.22",
-      "build_number": 4111,
-      "version_num": 301224111,
-      "version_desc": "version: 3.1.22\n版本更新：\n- ci: fix SIGPIPE in version.json release step (#7)\n- Sync Bilibili/Douyin follows, auto-release on merge, louder stereo audio (#6)\n- ci: skip MSIX when signing secrets are missing (#5)\n- Add server sync, Douyin QR login and real danmaku sending (#4)\n- ci: build debug-signed test APK when signing secrets are missing\n- Add in-app Huya login and followed-room sync (#3)\n- fix(auth): fall back to browser link GitHub login on Android (#2)\n- fix(volume): default mobile playback volume to 100% (#1)\n- Merge pull request #931 from vancez/master\n- fix(ios): add UIBackgroundModes audio for background playback",
+      "version": "3.1.23",
+      "build_number": 4112,
+      "version_num": 301234112,
+      "version_desc": "version: 3.1.23\n版本更新：\n- Fix Windows QR login blank page, Douyin danmaku CSRF, cookie sync on first join (#8)\n- ci: fix SIGPIPE in version.json release step (#7)\n- Sync Bilibili/Douyin follows, auto-release on merge, louder stereo audio (#6)\n- ci: skip MSIX when signing secrets are missing (#5)\n- Add server sync, Douyin QR login and real danmaku sending (#4)\n- ci: build debug-signed test APK when signing secrets are missing\n- Add in-app Huya login and followed-room sync (#3)\n- fix(auth): fall back to browser link GitHub login on Android (#2)\n- fix(volume): default mobile playback volume to 100% (#1)\n- Merge pull request #931 from vancez/master",
       "prerelease": false,
-      "download_url": "https://github.com/czczccc/pure_live/releases/tag/v3.1.22",
+      "download_url": "https://github.com/czczccc/pure_live/releases/tag/v3.1.23",
       "windows_msix_available": true
     },
     "linux": {
-      "version": "3.1.22",
-      "build_number": 4111,
-      "version_num": 301224111,
-      "version_desc": "version: 3.1.22\n版本更新：\n- ci: fix SIGPIPE in version.json release step (#7)\n- Sync Bilibili/Douyin follows, auto-release on merge, louder stereo audio (#6)\n- ci: skip MSIX when signing secrets are missing (#5)\n- Add server sync, Douyin QR login and real danmaku sending (#4)\n- ci: build debug-signed test APK when signing secrets are missing\n- Add in-app Huya login and followed-room sync (#3)\n- fix(auth): fall back to browser link GitHub login on Android (#2)\n- fix(volume): default mobile playback volume to 100% (#1)\n- Merge pull request #931 from vancez/master\n- fix(ios): add UIBackgroundModes audio for background playback",
+      "version": "3.1.23",
+      "build_number": 4112,
+      "version_num": 301234112,
+      "version_desc": "version: 3.1.23\n版本更新：\n- Fix Windows QR login blank page, Douyin danmaku CSRF, cookie sync on first join (#8)\n- ci: fix SIGPIPE in version.json release step (#7)\n- Sync Bilibili/Douyin follows, auto-release on merge, louder stereo audio (#6)\n- ci: skip MSIX when signing secrets are missing (#5)\n- Add server sync, Douyin QR login and real danmaku sending (#4)\n- ci: build debug-signed test APK when signing secrets are missing\n- Add in-app Huya login and followed-room sync (#3)\n- fix(auth): fall back to browser link GitHub login on Android (#2)\n- fix(volume): default mobile playback volume to 100% (#1)\n- Merge pull request #931 from vancez/master",
       "prerelease": false,
-      "download_url": "https://github.com/czczccc/pure_live/releases/tag/v3.1.22"
+      "download_url": "https://github.com/czczccc/pure_live/releases/tag/v3.1.23"
     },
     "macos": {
-      "version": "3.1.22",
-      "build_number": 4111,
-      "version_num": 301224111,
-      "version_desc": "version: 3.1.22\n版本更新：\n- ci: fix SIGPIPE in version.json release step (#7)\n- Sync Bilibili/Douyin follows, auto-release on merge, louder stereo audio (#6)\n- ci: skip MSIX when signing secrets are missing (#5)\n- Add server sync, Douyin QR login and real danmaku sending (#4)\n- ci: build debug-signed test APK when signing secrets are missing\n- Add in-app Huya login and followed-room sync (#3)\n- fix(auth): fall back to browser link GitHub login on Android (#2)\n- fix(volume): default mobile playback volume to 100% (#1)\n- Merge pull request #931 from vancez/master\n- fix(ios): add UIBackgroundModes audio for background playback",
+      "version": "3.1.23",
+      "build_number": 4112,
+      "version_num": 301234112,
+      "version_desc": "version: 3.1.23\n版本更新：\n- Fix Windows QR login blank page, Douyin danmaku CSRF, cookie sync on first join (#8)\n- ci: fix SIGPIPE in version.json release step (#7)\n- Sync Bilibili/Douyin follows, auto-release on merge, louder stereo audio (#6)\n- ci: skip MSIX when signing secrets are missing (#5)\n- Add server sync, Douyin QR login and real danmaku sending (#4)\n- ci: build debug-signed test APK when signing secrets are missing\n- Add in-app Huya login and followed-room sync (#3)\n- fix(auth): fall back to browser link GitHub login on Android (#2)\n- fix(volume): default mobile playback volume to 100% (#1)\n- Merge pull request #931 from vancez/master",
       "prerelease": false,
-      "download_url": "https://github.com/czczccc/pure_live/releases/tag/v3.1.22"
+      "download_url": "https://github.com/czczccc/pure_live/releases/tag/v3.1.23"
     },
     "ios": {
-      "version": "3.1.22",
-      "build_number": 4111,
-      "version_num": 301224111,
-      "version_desc": "version: 3.1.22\n版本更新：\n- ci: fix SIGPIPE in version.json release step (#7)\n- Sync Bilibili/Douyin follows, auto-release on merge, louder stereo audio (#6)\n- ci: skip MSIX when signing secrets are missing (#5)\n- Add server sync, Douyin QR login and real danmaku sending (#4)\n- ci: build debug-signed test APK when signing secrets are missing\n- Add in-app Huya login and followed-room sync (#3)\n- fix(auth): fall back to browser link GitHub login on Android (#2)\n- fix(volume): default mobile playback volume to 100% (#1)\n- Merge pull request #931 from vancez/master\n- fix(ios): add UIBackgroundModes audio for background playback",
+      "version": "3.1.23",
+      "build_number": 4112,
+      "version_num": 301234112,
+      "version_desc": "version: 3.1.23\n版本更新：\n- Fix Windows QR login blank page, Douyin danmaku CSRF, cookie sync on first join (#8)\n- ci: fix SIGPIPE in version.json release step (#7)\n- Sync Bilibili/Douyin follows, auto-release on merge, louder stereo audio (#6)\n- ci: skip MSIX when signing secrets are missing (#5)\n- Add server sync, Douyin QR login and real danmaku sending (#4)\n- ci: build debug-signed test APK when signing secrets are missing\n- Add in-app Huya login and followed-room sync (#3)\n- fix(auth): fall back to browser link GitHub login on Android (#2)\n- fix(volume): default mobile playback volume to 100% (#1)\n- Merge pull request #931 from vancez/master",
       "prerelease": false,
-      "download_url": "https://github.com/czczccc/pure_live/releases/tag/v3.1.22"
+      "download_url": "https://github.com/czczccc/pure_live/releases/tag/v3.1.23"
     }
   }
 }

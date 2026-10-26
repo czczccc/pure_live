@@ -762,6 +762,7 @@
   "unit_gb": "GB",
   "unit_kb": "KB",
   "unit_mb": "MB",
+  "one_tap_update": "Update now (download and install)",
   "update": "Update",
   "update_log": "Update Log",
   "use_pinyin_folder": "Use Pinyin Folder Name",

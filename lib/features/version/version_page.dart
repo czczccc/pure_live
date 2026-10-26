@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/services.dart';
 import 'package:remixicon/remixicon.dart';
 import 'package:pure_live/core/index.dart';
 import 'package:pure_live/features/version/app_update_flow.dart';
+import 'package:pure_live/features/version/one_tap_update.dart';
 import 'package:markdown_widget/widget/all.dart';
 import 'package:markdown_widget/config/configs.dart';
 import 'package:pure_live/core/platform/platform_utils.dart';
@@ -40,6 +42,15 @@ class VersionPage extends GetView<VersionController> {
           physics: const PureLiveScrollPhysics(),
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
           children: [
+            if (controller.hasNewVersion.value && (PlatformUtils.isAndroid || PlatformUtils.isWindows)) ...[
+              FilledButton.icon(
+                key: const ValueKey('version-one-tap-update'),
+                onPressed: controller.downloadPending.value ? null : () => unawaited(runOneTapUpdate()),
+                icon: const Icon(Remix.download_2_line),
+                label: Text(i18n('one_tap_update')),
+              ),
+              const SizedBox(height: 16),
+            ],
             if (PlatformUtils.isAndroid) ...[
               _buildPlatformCard(
                 context,

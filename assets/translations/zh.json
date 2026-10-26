@@ -763,6 +763,7 @@
   "unit_gb": "GB",
   "unit_kb": "KB",
   "unit_mb": "MB",
+  "one_tap_update": "一键更新（自动下载并安装）",
   "update": "更新",
   "update_log": "更新日志",
   "use_pinyin_folder": "使用拼音文件夹名",

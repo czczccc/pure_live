@@ -136,6 +136,7 @@ class DownloadApkDialog extends StatefulWidget {
     this.folderOpener,
     this.startAutomatically = true,
     this.showOpenFolder = true,
+    this.installAutomatically = false,
   });
 
   final String apkUrl;
@@ -155,6 +156,9 @@ class DownloadApkDialog extends StatefulWidget {
   /// Only a user-selected download directory enables this action; the platform
   /// default folder leaves direct installation as the only choice.
   final bool showOpenFolder;
+
+  /// Opens the installer as soon as the download finishes.
+  final bool installAutomatically;
 
   @override
   State<DownloadApkDialog> createState() => _DownloadApkDialogState();
@@ -242,6 +246,7 @@ class _DownloadApkDialogState extends State<DownloadApkDialog> {
         _downloadCompleted = true;
         _statusText = i18n('download_complete');
       });
+      if (widget.installAutomatically) unawaited(_openCompletedFile());
     } catch (error) {
       await _deleteIfPresent(partialFile);
 

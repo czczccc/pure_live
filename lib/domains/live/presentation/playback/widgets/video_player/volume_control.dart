@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:pure_live/core/utils/i18n.dart';
 import 'package:pure_live/core/platform/platform_utils.dart';
@@ -172,7 +173,7 @@ class _OverlayVolumeControlState extends State<OverlayVolumeControl> {
               owner.enableController();
               _startHideTimer();
             },
-            child: _buildVolumeBarUI(),
+            child: Listener(onPointerSignal: _handleScroll, child: _buildVolumeBarUI()),
           ),
         ),
       ),
@@ -183,7 +184,7 @@ class _OverlayVolumeControlState extends State<OverlayVolumeControl> {
 
   void _startHideTimer() {
     _hideTimer?.cancel();
-    _hideTimer = Timer(const Duration(milliseconds: 150), () {
+    _hideTimer = Timer(const Duration(milliseconds: 400), () {
       if (!_isMouseInIcon && !_isMouseInBar) {
         _removeOverlay();
       }
@@ -211,9 +212,8 @@ class _OverlayVolumeControlState extends State<OverlayVolumeControl> {
             borderRadius: BorderRadius.circular(22),
             border: Border.all(color: Colors.white10),
           ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final double trackHeight = constraints.maxHeight - 65;
+          child: Builder(
+            builder: (context) {
               final int percentage = (_volume * 100).round();
               return Column(
                 children: [
@@ -223,34 +223,52 @@ class _OverlayVolumeControlState extends State<OverlayVolumeControl> {
                     style: const TextStyle(color: Colors.white, fontSize: 11, fontWeight: FontWeight.bold),
                   ),
                   Expanded(
-                    child: GestureDetector(
-                      onVerticalDragUpdate: (details) => _handleVolumeDrag(details, trackHeight),
-                      child: Stack(
-                        alignment: Alignment.bottomCenter,
-                        children: [
-                          Container(
-                            width: 4,
-                            margin: const EdgeInsets.only(top: 10, bottom: 20),
-                            decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(2)),
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final double height = constraints.maxHeight;
+                        final double trackHeight = (height - 30).clamp(1.0, double.infinity);
+                        // Clicking or dragging anywhere on the track sets the
+                        // volume to that point, not just a relative nudge.
+                        void setFrom(Offset local) => _applyVolume((height - 20 - local.dy) / trackHeight);
+                        return GestureDetector(
+                          behavior: HitTestBehavior.opaque,
+                          onTapDown: (details) => setFrom(details.localPosition),
+                          onVerticalDragStart: (details) => setFrom(details.localPosition),
+                          onVerticalDragUpdate: (details) => setFrom(details.localPosition),
+                          child: Stack(
+                            alignment: Alignment.bottomCenter,
+                            children: [
+                              Container(
+                                width: 4,
+                                margin: const EdgeInsets.only(top: 10, bottom: 20),
+                                decoration: BoxDecoration(
+                                  color: Colors.white24,
+                                  borderRadius: BorderRadius.circular(2),
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 20,
+                                child: Container(
+                                  width: 4,
+                                  height: _volume * trackHeight,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(2),
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 20 + (_volume * trackHeight) - 6,
+                                child: Container(
+                                  width: 12,
+                                  height: 12,
+                                  decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
+                                ),
+                              ),
+                            ],
                           ),
-                          Positioned(
-                            bottom: 20,
-                            child: Container(
-                              width: 4,
-                              height: _volume * trackHeight,
-                              decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(2)),
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 20 + (_volume * trackHeight) - 6,
-                            child: Container(
-                              width: 12,
-                              height: 12,
-                              decoration: const BoxDecoration(color: Colors.white, shape: BoxShape.circle),
-                            ),
-                          ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                   ),
                 ],
@@ -262,10 +280,10 @@ class _OverlayVolumeControlState extends State<OverlayVolumeControl> {
     );
   }
 
-  void _handleVolumeDrag(DragUpdateDetails details, double trackHeight) {
-    if (trackHeight <= 0) return;
-    final deltaRatio = -details.delta.dy / trackHeight;
-    _applyVolume(_volume + deltaRatio);
+  /// Mouse wheel over the icon or the bar changes the volume by 5%.
+  void _handleScroll(PointerSignalEvent event) {
+    if (event is! PointerScrollEvent || event.scrollDelta.dy == 0) return;
+    _applyVolume(_volume + (event.scrollDelta.dy < 0 ? 0.05 : -0.05));
   }
 
   void _applyVolume(double value) {
@@ -304,12 +322,18 @@ class _OverlayVolumeControlState extends State<OverlayVolumeControl> {
             _isMouseInIcon = false;
             _startHideTimer();
           },
-          child: IconButton(
-            onPressed: _handleToggleMute,
-            visualDensity: VisualDensity.standard,
-            constraints: const BoxConstraints(minWidth: kMinInteractiveDimension, minHeight: kMinInteractiveDimension),
-            icon: Icon(icon, color: Colors.white, size: 24),
-            tooltip: _volume == 0 ? i18n('cancel_mute') : i18n('mute'),
+          child: Listener(
+            onPointerSignal: _handleScroll,
+            child: IconButton(
+              onPressed: _handleToggleMute,
+              visualDensity: VisualDensity.standard,
+              constraints: const BoxConstraints(
+                minWidth: kMinInteractiveDimension,
+                minHeight: kMinInteractiveDimension,
+              ),
+              icon: Icon(icon, color: Colors.white, size: 24),
+              tooltip: _volume == 0 ? i18n('cancel_mute') : i18n('mute'),
+            ),
           ),
         ),
       ),

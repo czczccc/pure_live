@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
+import 'package:pure_live/domains/live/data/web_danmaku_sender.dart';
 import 'package:pure_live/core/models/live_room.dart';
 import 'package:pure_live/core/tars/types.dart';
 import 'package:pure_live/core/tars/base_tars_http.dart';
@@ -41,6 +44,20 @@ String? douyinCsrfTokenFromHeader(String? header) {
   return parts[1].trim();
 }
 
+/// The web page that hosts [room]'s chat box, for Huya and Douyin.
+({String url, String domain})? webPageTarget(LiveRoom room) {
+  final roomId = room.roomId?.trim() ?? '';
+  switch (room.platform?.trim().toLowerCase()) {
+    case 'huya':
+      return roomId.isEmpty ? null : (url: 'https://www.huya.com/$roomId', domain: '.huya.com');
+    case 'douyin':
+      final args = room.danmakuData;
+      final webRid = args is DouyinDanmakuArgs && args.webRid.isNotEmpty ? args.webRid : roomId;
+      return webRid.isEmpty ? null : (url: 'https://live.douyin.com/$webRid', domain: '.douyin.com');
+  }
+  return null;
+}
+
 /// Sends real danmaku to the platform with the account cookie the user signed
 /// in with. Only Bilibili, Douyin and Huya are supported.
 class DanmakuSender {
@@ -63,9 +80,9 @@ class DanmakuSender {
         case 'bilibili':
           return await _sendBilibili(room, message, cookie);
         case 'douyin':
-          return await _sendDouyin(room, message, cookie);
+          return await _viaWebPage(room, message, cookie, () => _sendDouyin(room, message, cookie));
         case 'huya':
-          return await _sendHuya(room, message, cookie);
+          return await _viaWebPage(room, message, cookie, () => _sendHuya(room, message, cookie));
         default:
           return const DanmakuSendResult(DanmakuSendStatus.unsupported);
       }
@@ -74,6 +91,34 @@ class DanmakuSender {
     } catch (e) {
       return DanmakuSendResult(DanmakuSendStatus.failed, '$e');
     }
+  }
+
+  /// Huya and Douyin go through their web page first; the direct API is the
+  /// fallback when the page has no usable chat box.
+  Future<DanmakuSendResult> _viaWebPage(
+    LiveRoom room,
+    String message,
+    String cookie,
+    Future<DanmakuSendResult> Function() api,
+  ) async {
+    final target = webPageTarget(room);
+    if (target == null || !(Platform.isAndroid || Platform.isWindows)) return api();
+    String reason;
+    try {
+      reason = await WebDanmakuSender.instance.send(
+        url: target.url,
+        domain: target.domain,
+        cookie: cookie,
+        text: message,
+      );
+    } catch (e) {
+      reason = '$e';
+    }
+    if (reason == 'ok') return const DanmakuSendResult(DanmakuSendStatus.sent);
+    if (reason == 'login') return const DanmakuSendResult(DanmakuSendStatus.notLoggedIn);
+    final fallback = await api();
+    if (fallback.sent || fallback.status == DanmakuSendStatus.notLoggedIn) return fallback;
+    return DanmakuSendResult(DanmakuSendStatus.failed, 'web $reason / api ${fallback.message}');
   }
 
   Future<DanmakuSendResult> _sendBilibili(LiveRoom room, String message, String cookie) async {

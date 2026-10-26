@@ -33,6 +33,7 @@ import 'package:pure_live/domains/live/domain/global_player_service.dart';
 import 'package:pure_live/domains/live/data/favorite_room_controller.dart';
 import 'package:pure_live/domains/live/data/history_controller.dart';
 import 'package:pure_live/domains/live/data/danmaku_sender.dart';
+import 'package:pure_live/domains/live/data/web_danmaku_sender.dart';
 import 'package:pure_live/core/config/cookie_settings_controller.dart';
 
 // live_play_controller.dart
@@ -1273,6 +1274,7 @@ class LivePlayController extends GetxController
 
   @override
   void onClose() {
+    unawaited(WebDanmakuSender.instance.dispose());
     _ownerClosed = true;
     _roomLoadEpoch++;
     _iptvPlaybackEpoch++;

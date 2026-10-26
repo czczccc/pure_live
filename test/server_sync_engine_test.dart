@@ -101,6 +101,19 @@ void main() {
     expect(await a.engine.sync(local: a.data, transport: server.call, now: 400, backupVersion: 3), isNull);
   });
 
+  test('first join keeps a local login when the server cookie is empty', () async {
+    final server = FakeServer();
+    final android = Device(backup(cookie: {'douyinCookie': ''}));
+    await android.sync(server, 100);
+
+    final windows = Device(backup(cookie: {'douyinCookie': 'sessionid=1'}));
+    await windows.sync(server, 200);
+    expect(windows.data['cookie']['douyinCookie'], 'sessionid=1');
+
+    await android.sync(server, 300);
+    expect(android.data['cookie']['douyinCookie'], 'sessionid=1');
+  });
+
   test('state survives encode and decode', () async {
     final server = FakeServer();
     final a = Device(backup(rooms: [room('huya', '1')]));

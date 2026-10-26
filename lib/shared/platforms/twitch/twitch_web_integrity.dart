@@ -1,3 +1,5 @@
+import 'package:pure_live/core/network/app_webview_environment.dart';
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -187,6 +189,7 @@ class TwitchWebIntegrityProvider {
         historyUrl: origin,
       );
       webView = HeadlessInAppWebView(
+        webViewEnvironment: AppWebViewEnvironment.instance,
         // Android's loadDataWithBaseURL keeps a synthetic document origin on
         // some WebView builds. Kasada then never emits kpsdk-ready. Navigate
         // to Twitch's real origin and fulfil only the main document with a

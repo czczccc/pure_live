@@ -1,6 +1,7 @@
+import 'package:pure_live/core/network/app_webview_environment.dart';
+
 import 'dart:async';
 
-import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:pure_live/core/index.dart';
 import 'package:pure_live/core/models/bilibili_user_info_page.dart';
 import 'package:pure_live/core/network/cookie_sanitizer.dart';
@@ -198,7 +199,7 @@ class BiliBiliAccountService extends GetxController {
     return Map<String, dynamic>.from(result);
   }
 
-  static Future<void> _clearBrowserCookies() => CookieManager.instance().deleteAllCookies();
+  static Future<void> _clearBrowserCookies() => AppWebViewEnvironment.cookies().deleteAllCookies();
 
   static void _showNotice(String localizationKey) {
     ToastUtil.show(i18n(localizationKey));

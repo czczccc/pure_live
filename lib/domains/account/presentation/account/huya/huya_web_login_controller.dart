@@ -1,3 +1,5 @@
+import 'package:pure_live/core/network/app_webview_environment.dart';
+
 import 'dart:async';
 
 import 'package:pure_live/core/index.dart';
@@ -69,7 +71,7 @@ class HuyaWebLoginController extends GetxController {
   static Future<String> _loadBrowserCookie() async {
     final byName = <String, String>{};
     for (final url in const ['https://www.huya.com/', 'https://huya.com/']) {
-      final cookies = await CookieManager.instance().getCookies(url: WebUri(url));
+      final cookies = await AppWebViewEnvironment.cookies().getCookies(url: WebUri(url));
       for (final cookie in cookies) {
         byName.putIfAbsent(cookie.name, () => '${cookie.value}');
       }
@@ -86,8 +88,8 @@ class HuyaWebLoginController extends GetxController {
 Future<void> clearHuyaWebLoginCookies() async {
   try {
     for (final url in const ['https://www.huya.com/', 'https://huya.com/']) {
-      await CookieManager.instance().deleteCookies(url: WebUri(url), domain: '.huya.com');
-      await CookieManager.instance().deleteCookies(url: WebUri(url));
+      await AppWebViewEnvironment.cookies().deleteCookies(url: WebUri(url), domain: '.huya.com');
+      await AppWebViewEnvironment.cookies().deleteCookies(url: WebUri(url));
     }
   } catch (_) {
     // A platform without a WebView cookie store has nothing to clear.

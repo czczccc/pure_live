@@ -1,3 +1,5 @@
+import 'package:pure_live/core/network/app_webview_environment.dart';
+
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
@@ -63,6 +65,7 @@ class _WebSearchPageState extends State<WebSearchPage> {
           child: Obx(
             () => controller.showWebView.value
                 ? InAppWebView(
+                    webViewEnvironment: AppWebViewEnvironment.instance,
                     onWebViewCreated: controller.onWebViewCreated,
                     onLoadStart: controller.onLoadStart,
                     onLoadStop: controller.onLoadStop,

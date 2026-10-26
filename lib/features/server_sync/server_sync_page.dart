@@ -1,5 +1,6 @@
 import 'package:pure_live/core/index.dart';
 import 'package:pure_live/features/server_sync/server_sync_controller.dart';
+import 'package:pure_live/core/config/cookie_settings_controller.dart';
 
 class ServerSyncPage extends StatefulWidget {
   const ServerSyncPage({super.key});
@@ -72,7 +73,12 @@ class _ServerSyncPageState extends State<ServerSyncPage> {
                 ? i18n('server_sync_never')
                 : '${i18n('server_sync_last')}: ${DateTime.fromMillisecondsSinceEpoch(at).toString().substring(0, 19)}';
             final error = controller.lastError.v;
-            return Text(error.isEmpty ? status : '$status\n${i18n('server_sync_failed')}: $error');
+            final cookies = CookieSettingsController.to;
+            String mark(String site, String cookie) => '${i18n(site)} ${cookie.trim().isEmpty ? '✗' : '✓'}';
+            final accounts =
+                '${i18n('server_sync_accounts')}: ${mark('site_bilibili', cookies.bilibiliCookie.v)}  '
+                '${mark('site_douyin', cookies.douyinCookie.v)}  ${mark('site_huya', cookies.huyaCookie.v)}';
+            return Text('${error.isEmpty ? status : '$status\n${i18n('server_sync_failed')}: $error'}\n$accounts');
           }),
           const SizedBox(height: 16),
           Row(

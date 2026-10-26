@@ -1,3 +1,4 @@
+import 'package:pure_live/core/network/app_webview_environment.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:pure_live/core/index.dart';
 import 'package:pure_live/domains/account/presentation/account/bilibili/web_login_controller.dart';
@@ -57,6 +58,7 @@ class BiliBiliWebLoginPage extends GetView<BiliBiliWebLoginController> {
           children: [
             if (controller.showWebView.value)
               InAppWebView(
+                webViewEnvironment: AppWebViewEnvironment.instance,
                 initialUrlRequest: URLRequest(url: WebUri(bilibiliWebLoginUrl)),
                 onWebViewCreated: controller.onWebViewCreated,
                 onLoadStop: controller.onLoadStop,

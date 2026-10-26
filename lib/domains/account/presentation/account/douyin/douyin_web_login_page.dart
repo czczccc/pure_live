@@ -1,3 +1,4 @@
+import 'package:pure_live/core/network/app_webview_environment.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:pure_live/core/index.dart';
 import 'package:pure_live/domains/account/presentation/account/douyin/douyin_web_login_controller.dart';
@@ -31,6 +32,7 @@ class DouyinWebLoginPage extends GetView<DouyinWebLoginController> {
           ),
           Expanded(
             child: InAppWebView(
+              webViewEnvironment: AppWebViewEnvironment.instance,
               initialUrlRequest: URLRequest(url: WebUri(douyinWebLoginUrl)),
               onLoadStop: controller.onLoadStop,
               initialSettings: InAppWebViewSettings(

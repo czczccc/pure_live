@@ -2666,6 +2666,7 @@
   "server_sync_enable": "自动同步",
   "server_sync_now": "立即同步",
   "server_sync_save": "保存",
+  "server_sync_accounts": "本机账号",
   "server_sync_last": "上次同步",
   "server_sync_never": "尚未同步",
   "server_sync_failed": "同步失败",

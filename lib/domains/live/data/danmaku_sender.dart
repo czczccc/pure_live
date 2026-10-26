@@ -34,6 +34,13 @@ String? cookieValue(String cookie, String name) {
   return null;
 }
 
+/// Token from an `x-ware-csrf-token` header such as `0,<token>,86370000,success,<sid>`.
+String? douyinCsrfTokenFromHeader(String? header) {
+  final parts = (header ?? '').split(',');
+  if (parts.length < 2 || parts[1].trim().isEmpty) return null;
+  return parts[1].trim();
+}
+
 /// Sends real danmaku to the platform with the account cookie the user signed
 /// in with. Only Bilibili, Douyin and Huya are supported.
 class DanmakuSender {
@@ -117,16 +124,16 @@ class DanmakuSender {
       'type': '0',
       'common_label_list': '[]',
     });
+    final headers = {
+      'Cookie': cookie,
+      'User-Agent': DouyinRequestParams.kDefaultUserAgent,
+      'Origin': 'https://live.douyin.com',
+      'Referer': 'https://live.douyin.com/$webRid',
+    };
+    final csrf = await _douyinCsrfToken(url, headers);
     final response = await _dio.post<Map<String, dynamic>>(
       url,
-      options: Options(
-        headers: {
-          'Cookie': cookie,
-          'User-Agent': DouyinRequestParams.kDefaultUserAgent,
-          'Origin': 'https://live.douyin.com',
-          'Referer': 'https://live.douyin.com/$webRid',
-        },
-      ),
+      options: Options(headers: {...headers, 'x-secsdk-csrf-token': ?csrf}),
     );
     final data = response.data ?? const {};
     final code = data['status_code'];
@@ -135,6 +142,23 @@ class DanmakuSender {
     final prompt = extra is Map ? (extra['prompts'] ?? extra['message']) : null;
     if (code == 20003) return const DanmakuSendResult(DanmakuSendStatus.notLoggedIn);
     return DanmakuSendResult(DanmakuSendStatus.failed, '${prompt ?? data['status_message'] ?? code}');
+  }
+
+  /// Douyin's web POST endpoints reject requests without the secsdk CSRF
+  /// token, which a HEAD request to the same URL hands out.
+  Future<String?> _douyinCsrfToken(String url, Map<String, String> headers) async {
+    try {
+      final response = await _dio.head<void>(
+        url,
+        options: Options(
+          headers: {...headers, 'x-secsdk-csrf-request': '1', 'x-secsdk-csrf-version': '1.2.22'},
+          validateStatus: (_) => true,
+        ),
+      );
+      return douyinCsrfTokenFromHeader(response.headers.value('x-ware-csrf-token'));
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<DanmakuSendResult> _sendHuya(LiveRoom room, String message, String cookie) async {

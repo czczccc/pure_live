@@ -43,4 +43,10 @@ void main() {
     expect(decoded.tUserId.lUid, 7);
     expect(decoded.tBulletFormat.iFontSize, 4);
   });
+
+  test('reads the Douyin CSRF token header', () {
+    expect(douyinCsrfTokenFromHeader('0,abc123,86370000,success,sid'), 'abc123');
+    expect(douyinCsrfTokenFromHeader(null), isNull);
+    expect(douyinCsrfTokenFromHeader('0,,1'), isNull);
+  });
 }

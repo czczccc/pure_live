@@ -44,6 +44,8 @@ class ServerSyncController extends GetxController {
     BaseOptions(connectTimeout: const Duration(seconds: 15), receiveTimeout: const Duration(seconds: 60)),
   );
   Timer? _timer;
+  Timer? _cookieDebounce;
+  final List<Worker> _cookieWorkers = [];
 
   bool get configured => serverUrl.v.trim().isNotEmpty && token.v.trim().isNotEmpty;
 
@@ -51,11 +53,27 @@ class ServerSyncController extends GetxController {
   void onReady() {
     super.onReady();
     _schedule();
+    // A fresh login should reach the other devices right away, not on the
+    // next two-minute tick.
+    final cookies = CookieSettingsController.to;
+    for (final field in [cookies.bilibiliCookie, cookies.douyinCookie, cookies.huyaCookie]) {
+      _cookieWorkers.add(ever<String>(field, (_) => _syncSoon()));
+    }
+  }
+
+  void _syncSoon() {
+    if (!enabled.v || !configured) return;
+    _cookieDebounce?.cancel();
+    _cookieDebounce = Timer(const Duration(seconds: 3), () => unawaited(syncNow(silent: true)));
   }
 
   @override
   void onClose() {
     _timer?.cancel();
+    _cookieDebounce?.cancel();
+    for (final worker in _cookieWorkers) {
+      worker.dispose();
+    }
     super.onClose();
   }
 

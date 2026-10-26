@@ -1,3 +1,5 @@
+import 'package:pure_live/core/network/app_webview_environment.dart';
+
 import 'dart:async';
 
 import 'package:pure_live/core/index.dart';
@@ -173,7 +175,7 @@ class BiliBiliWebLoginController extends GetxController {
   }
 
   static Future<String> _loadBrowserCookie(WebUri uri) async {
-    final cookies = await CookieManager.instance().getCookies(url: uri);
+    final cookies = await AppWebViewEnvironment.cookies().getCookies(url: uri);
     return cookies
         .map((cookie) => normalizeAccountCookie('${cookie.name}=${cookie.value}'))
         .where((cookie) => cookie.isNotEmpty)

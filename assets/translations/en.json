@@ -2666,6 +2666,7 @@
   "server_sync_enable": "Sync automatically",
   "server_sync_now": "Sync now",
   "server_sync_save": "Save",
+  "server_sync_accounts": "Accounts on this device",
   "server_sync_last": "Last sync",
   "server_sync_never": "Never synced",
   "server_sync_failed": "Sync failed",

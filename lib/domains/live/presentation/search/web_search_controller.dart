@@ -1,3 +1,5 @@
+import 'package:pure_live/core/network/app_webview_environment.dart';
+
 import 'dart:async';
 import 'dart:developer' as developer;
 import 'dart:io';
@@ -524,7 +526,7 @@ class WebSearchController extends GetxController {
   }
 
   static Future<void> _defaultFlushCookies() {
-    return CookieManager.instance().flush();
+    return AppWebViewEnvironment.cookies().flush();
   }
 
   static void _defaultNotice(String localizationKey) {

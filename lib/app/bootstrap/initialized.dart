@@ -1,3 +1,5 @@
+import 'package:pure_live/core/network/app_webview_environment.dart';
+
 import 'dart:io';
 import 'dart:async';
 import 'dart:developer';
@@ -62,6 +64,7 @@ class AppInitializer {
     await _initWindowsSingleInstance(args, instanceId);
 
     await AppPathManager().initialize(instanceId: instanceId);
+    await AppWebViewEnvironment.initialize();
     await EasyLocalization.ensureInitialized();
     final Directory hiveDir = await AppPathManager().getDir(AppPathManager.dirHiveDB);
 

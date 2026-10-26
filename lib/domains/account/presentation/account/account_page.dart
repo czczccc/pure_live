@@ -1,3 +1,5 @@
+import 'package:pure_live/core/network/app_webview_environment.dart';
+
 import 'dart:async';
 
 import 'package:remixicon/remixicon.dart';
@@ -65,7 +67,7 @@ class AccountPage extends GetView<AccountController> {
                           unawaited(clearHuyaWebLoginCookies());
                         },
                       )
-                    : Get.toNamed(RoutePath.kHuyaWebLogin),
+                    : _openWebLogin(RoutePath.kHuyaWebLogin, RoutePath.kHuyaCookie),
               );
             }),
             Obx(() {
@@ -119,7 +121,7 @@ class AccountPage extends GetView<AccountController> {
                           unawaited(clearDouyinWebLoginCookies());
                         },
                       )
-                    : Get.toNamed(RoutePath.kDouyinWebLogin),
+                    : _openWebLogin(RoutePath.kDouyinWebLogin, RoutePath.kDouyinCookie),
               );
             }),
 
@@ -371,4 +373,15 @@ class AccountPage extends GetView<AccountController> {
     );
     return confirmed == true;
   }
+}
+
+/// Windows without the WebView2 runtime cannot show the QR login page, so
+/// fall back to pasting the cookie by hand.
+void _openWebLogin(String webRoute, String manualRoute) {
+  if (AppWebViewEnvironment.available) {
+    Get.toNamed(webRoute);
+    return;
+  }
+  ToastUtil.show(i18n('webview2_missing_title'));
+  Get.toNamed(manualRoute);
 }

@@ -83,7 +83,9 @@ class ServerSyncEngine {
       final fingerprint = ServerSyncCodec.fingerprint(record.data);
       if (state.snapshot[entry.key] == fingerprint) continue;
       final remote = state.store[entry.key];
-      if (fresh && remote != null && !remote.deleted) {
+      // An empty remote value (a device that never signed in) must not
+      // replace an account this device already has.
+      if (fresh && remote != null && !remote.deleted && !_isBlank(remote.data)) {
         final perItem = ServerSyncCodec.favoriteCollections.contains(record.collection);
         if (!perItem || ServerSyncCodec.fingerprint(remote.data) == fingerprint) continue;
       }
@@ -113,6 +115,8 @@ class ServerSyncEngine {
     if (!differs) return null;
     return ServerSyncCodec.decode(state.store.values, backupVersion: backupVersion);
   }
+
+  static bool _isBlank(Object? data) => data == null || (data is String && data.trim().isEmpty);
 
   void _merge(SyncResponse response) {
     for (final record in response.changes) {

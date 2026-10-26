@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:pure_live/core/index.dart';
+import 'package:pure_live/features/version/one_tap_update.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:markdown_widget/config/configs.dart';
 import 'package:markdown_widget/widget/markdown_block.dart';
@@ -76,7 +79,7 @@ class NewVersionDialog extends StatelessWidget {
             if (callback != null) {
               callback();
             } else {
-              Get.toNamed(RoutePath.kVersionPage);
+              unawaited(runOneTapUpdate());
             }
           },
           child: Text(i18n("update")),
